@@ -1,0 +1,13 @@
+Este programa es el meta socket encargado de la comunicación entre mqtt y los puertos. 
+
+Debe ser configurable desde un fichero/DB para los siguientes parametros
+
+* Puerto/canal de comunicacion
+    - Parametros del puerto
+* Tipo de dispositivo
+    - nombre
+    - informacion de dispositivo
+* Lectura , escritura , o ambos.
+
+
+Hacer una interface gráfica para configurar el fichero / DB

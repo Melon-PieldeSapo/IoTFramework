@@ -1,0 +1,665 @@
+\documentclass[12pt, a4paper, oneside, titlepage]{article}
+\usepackage{amsmath,amssymb,amsfonts} % Typical maths resource packages
+\usepackage{graphics}                 % Packages to allow inclusion of graphics
+\usepackage{color}                    % For creating coloured text and background
+\usepackage{hyperref}                 % For creating hyperlinks in cross references
+\usepackage{enumerate}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{epigraph}
+\usepackage{calc}
+\usepackage{multirow}
+\usepackage[official]{eurosym}
+\usepackage{listings}
+
+\lstset{
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  frame=single,
+  breaklines=true,
+  tabsize=2,
+  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+}
+
+%\usepackage[backend=biber,natbib=true,eprint=false,style=ieee,]{biblatex}
+%natbib=true,
+%url=false, 
+%doi=true,
+%eprint=false
+%\addbibresource{database.bib}
+
+
+\newcommand{\mytextformat}{\itshape\epigraphsize}
+\newenvironment{mytext}{\mytextformat}{}
+\newenvironment{mysource}{\scshape\hfill}{}
+\renewcommand{\textflush}{mytext} 
+\renewcommand{\sourceflush}{mysource}
+
+\let\originalepigraph\epigraph 
+\renewcommand\epigraph[2]%
+{\setlength{\epigraphwidth}{\widthof{\mytextformat#1}}\originalepigraph{#1}{#2}}
+
+%\usepackage{titlesec}
+\usepackage{tocloft}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\usepackage{lipsum}
+%\usepackage{makeidx}
+\usepackage{color}   %May be necessary if you want to color links
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true, %set true if you want colored links
+	linktoc=all,     %set to all if you want both sections and subsections linked
+	linkcolor=black,  %choose some color if you want links to stand out
+}
+\usepackage[pdftex]{graphicx}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\setlength{\parindent}{2em}
+\setlength{\parskip}{1em}
+
+\usepackage{float}
+\newcommand{\separador}{\subsubsection*{} \noindent}
+
+\pagestyle {myheadings}
+
+\begin{document}
+	
+	\begin{titlepage}
+		\begin{center}
+			\textsc{\LARGE }\\[1.5cm]
+			\textsc{\Large }\\[0.5cm]
+			Deutsches Zentrum für Luft- und Raumfahrt\\
+			Experimental Gravitational Physics and Geodesy \\
+			\HRule \\[0.8cm]
+			{ \huge \bfseries Fichero de configuración JSON.}\\[0.4cm]
+			
+\begin{Large}
+					Elementos y valores al detalle
+
+			\end{Large}			\HRule \\[1.5cm]
+			
+			% Author and supervisor
+			\begin{minipage}{0.4\textwidth}
+				\begin{flushleft} \large
+					\emph{Autor:}\\
+					Pablo \textsc{Torres Anaya}
+				\end{flushleft}
+			\end{minipage}
+			\begin{minipage}{0.4\textwidth}
+				\begin{flushright} \large
+					%\emph{Ilustradora:} \\
+					%Rocio \textsc{}
+				\end{flushright}
+			\end{minipage}
+			\vfill
+			%\includegraphics[width=25mm]{cc.jpg} \\
+			%Esta obra está bajo una \href{http://creativecommons.org/licenses/by-nc-nd/3.0/deed.es}{Licencia Creative Commons Atribución-NoComercial-SinDerivadas 3.0 Unported.}\\
+			{\large \today}\\
+			{\normalsize Powered by \LaTeX}
+			
+		\end{center}
+	\end{titlepage}
+	%Esquema general
+	\tableofcontents
+
+\begin{abstract}
+--todo general-- Usar notación estándar de construcción para definir los elementos.
+--todo-- En esta sección explicar a fondo cual es la estructura del fichero de configuración y como funciona
+
+El script de python se configura mediante un único fichero JSON donde especificamos todos sus parámetros de funcionamiento usando una estructura concreta.
+
+
+Primero vamos a ver un ejemplo resumido del fichero con algunas indicaciones y a continuación se detallan todos los posibles valores y configuraciones del fichero.
+
+\end{abstract}	
+
+\section*{Ejemplo con comentarios}
+
+Este ejemplo contiene algunos comentarios cortos sobre cada elemento.
+No se puede usar directamente ya que no es un JSON válido por tener los comentarios.
+\begin{lstlisting}
+{
+	"control": { <- Main Control configuration
+		"address": "localhost", <- MQTT Broker addres
+		"port": 1883,	<- MQTT Broker port
+		"topic": "master/control", <- MQTT control topic
+		"qos": 0, <- MQTT control topic qos
+		"control_messages": { <- control messages
+			"reload": "msg_reload",
+			"shutdown": "msg_shutdown",
+			"status": "msg_status"
+		}
+	},
+	"dbs": {<- [OPTIONAL] Dictionary list of Databases
+		"influxdb0":{ <- Id of the new database
+			"class_name": "Influx", <- Type of database System (Only Influx implemented for now)
+			"addres": "localhost", <- Addres of database System
+			"port": "default", <- Port of database System
+			"db_name": "payload_logger", <- Name of the desired Database
+			"user": "admin", 
+			"password": "admin"
+		},
+		"influxdb1": {...}, <- Aditional databases
+		"mysqldb0": {...} <- mysql not yet implemented
+    },
+	"joiners": { <- [OPTIONAL] List of joining functions
+			"join_1":{<- Id of the join
+			"synchronous": 1, <- If the join  synchronice the data
+			"function": "({0}+{1})/2", <- Function to implement
+			"topics": { <- Topics structure explained later
+				"topic_1":  {},
+				"topic2": {},
+				"anothertopic":{},
+				"one more":{}
+			}
+		},
+		"join_2":{...},
+		"another_join":{}
+	},
+	"sockets": { <- List of all sockets connections
+		"id_filesocket_interferometer_1" : { <- ID of the socket
+			"class_name": "FileSocket", <- Tipe of the socket
+			"control":[ <- Control sistem of the socket
+				{
+					"topic" : "interferometer/control/power", <- Topic to receive commands
+					"qos" : 1, <- qos to subscribe the topic
+					"actions":[ <- List of actions
+						{
+							"message":"stop", <- if we recive this msg
+							"action":0 <- we perform this action
+						},
+						{
+							"message":"start",
+							"action":1
+						}
+					]
+				}
+			],
+			"publish": { <- How to deal with the data
+				"parser": "#{0}:{1};",<- specify the format of the data
+				"join": [ <- If the data goes to a join function (list)
+					{
+						"from": 0, <- position of the data in the parser
+						"to": "join_1", <- id of the join
+						"position": 0, <- position inside the join function
+						"sync": 1 <- position of the sync mark the in parser
+					},
+					{...}, 
+					{...}
+				],
+				"topics": {<- list of actions for data
+					"0": { <- list of actions for data 0
+						"raw":{ <- id of the action
+							"function": "Raw", <- function of the action
+							"samples": 1, <- number of samples to perform the action
+							"topic": "interferometer/value", <- where do we publish it,
+							"to_db":{ <- if we whant to save on Database
+								"table":"interferometer/raw", <- Table
+								"column":"payload", <- Column
+								"db_id":"db0" <- Id of the Database
+							}
+						},
+						"variance"{...} <- Another action
+                    },
+					"1": { <- list of actions for data 1
+						"raw":{
+							"function": "Raw",
+							"samples": 1,
+							"topic": "interferometer/sync"
+						},
+						"variance"{...}
+					},
+                    
+				},
+				"file_name": "filename.txt", <- Aditional Parameter for FileSocket
+				"delay": 0.001 <- Specify a delay to the read function (for soft-sync)
+			}
+		},
+		"id_serialsocket_interferometer2": {
+			"class_name": "SerialSocket",
+			"eol_character":";", <- Aditional Parameter for SerialSocket
+			"port": "/dev/ttyACM0",<- Aditional Parameter for SerialSocket
+			"baudrate":9600,<- Aditional Parameter for SerialSocket
+			"control":[{ ... },{ ... } ... ],
+			"publish": {
+				"parser": "#{0}:{1};",
+				"join": [ {...}, ... ],
+				"topics": { ... },
+			}
+			"delay": 0.001
+		}
+	}
+}
+
+\end{lstlisting}
+
+El fichero tiene cuatro elementos principales
+
+\begin{itemize}
+\item control - Obligatorio
+\item dbs  - Opcional
+\item joins  - Opcional
+\item sockets  - Opcional
+\end{itemize}
+
+\section{Control}
+
+En esta sección configuramos la conexión al servidor de MQTT y cual va a ser el topic para controlar el programa principal y sus mensajes. Este elemento es obligatorio en el fichero JSON.
+
+Los elementos que tiene son:
+
+\begin{itemize}
+\item		''address'' - MQTT Broker addres
+\item		''port'' - MQTT Broker port
+\item		''topic'' - MQTT control topic
+\item		''qos'' - MQTT control topic qos [Default: 0]
+\item		''control\_messages'' - control messages list
+\end{itemize}
+\subsection{Address}
+%TODO
+--todo--
+\subsection{Port}
+%TODO
+--todo--
+\subsection{Topic}
+%TODO
+--todo--
+\subsection{Qos}
+%TODO
+--todo--
+\subsection{Control Messages}
+''control\_messages'' es un diccionario donde configuramos cuales van a ser los mensajes que esperamos recibir en el topic de control para realizar las tres acciones de control que soporta el sistema actualmente.
+ 
+Elementos que debe tener ''control\_messages'':
+\begin{itemize}
+\item			''reload'' - string del mensaje que queremos usar para recargar la configuración
+\item			''shutdown'' - string del mensaje que queremos usar para apagar el sistema
+\item			''status'' - string del mensaje que queremos usar para consultar el estado del sistema
+\end{itemize}
+
+\subsection{Ejemplo}
+\begin{lstlisting}
+"control": { 
+	"address": "localhost",
+	"port": 1883,	
+	"topic": "master/control",
+	"qos": 0, 
+	"control_messages": { 
+		"reload": "msg_reload",
+		"shutdown": "msg_shutdown",
+		"status": "msg_status"
+	}
+},
+\end{lstlisting}
+
+
+\section{DBs}
+
+dbs es una lista de bases de datos donde cada entrada corresponde a una base de datos. No es obligatorio poner dbs en el fichero de configuración.
+
+Cada entrada consta de un ID y un diccionario de configuración. El ID es arbitrario y sirve para identificar esa conexión en otros puntos del fichero. 
+
+Cada base de datos consta de los siguientes elementos:
+\begin{itemize}
+\item	''class\_name'' - Tipo de Database. Valores: [''Influx'']
+\item	''addres'' - Dirección del servidor 
+\item	''port'' -  Puerto de conexión 
+\item	''db\_name'' - Nombre de la base de datos
+\item	''user'' - Usuario
+\item	''password'' - Contraseña
+\end{itemize}
+		
+\subsection{Class Name}
+%TODO
+ -- todo --
+\subsection{Address}
+%TODO
+ -- todo --
+\subsection{Port}
+%TODO
+ -- todo --
+\subsection{Db Name}
+%TODO
+ -- todo --
+\subsection{User}
+%TODO
+ -- todo --
+\subsection{Password}
+%TODO
+ -- todo --
+
+		
+\subsection{Ejemplo}
+\begin{lstlisting}
+
+"dbs":{
+	"db0":{
+		"class_name": "Influx",
+		"addres": "localhost",
+		"port": "default",
+		"db_name": "payload_logger",
+		"user": "admin",
+		"password": "admin"
+	},
+	"db1":{...},
+	"anotherdb":{...}
+}
+\end{lstlisting}
+
+\section{Topic}
+
+Un topic es la unidad de output del script. Determina como ''sale'' un dato del sistema. Y consta de los siguientes elementos:
+
+\begin{itemize}
+\item	''function'' - La función de salida que queremos aplicar al dato. Valores [''Raw'',''Variance'',''Mean'',''StandardDeviation'']
+\item	''samples'' - Cada cuantas muestras queremos aplicar la función y hacer la salida del dato. [Default: 100]
+\item	''topic'' - Si está presente indica en que topic de MQTT queremos publicar los datos
+\item	''retain'' - Si se tiene que retener el dato en MQTT [Default: 0]
+\item	''qos'' - El qos de la publicación [Default: 0]
+\item	''to\_db'' - Si está presente indica que se tiene que guardar en una base de datos. Es un diccionario con los siguientes elementos:
+	\begin{itemize}
+	\item ''table'' - Tabla que debe almacenar este dato
+	\item ''column'' - Columna a la que hay que asignar este dato
+	\item ''db\_id'' - Identificador de la base de datos donde queremos guardarlo. 
+	\end{itemize}
+\end{itemize}
+
+
+
+\subsection{Function}
+%TODO
+%Explicar todas las funciones en detalles
+Valores del campo ''function'':
+\begin{itemize}
+\item ''Raw'' - Muestra el ultimo dato recibido ignorando todos los anteriores. Si se configura con "samples":1 es equivalente a mostrar todos los datos.
+\item ''Mean'' - Obtiene la media de todos los datos.
+\item ''Variance'' - Obtiene la varianza de todos los datos.
+\item ''StandardDeviation'' - Obtiene la desviación estándar de todos los datos
+\end{itemize}
+
+\subsection{Samples}
+%TODO
+ -- todo --
+ \subsection{Topic}
+%TODO
+ -- todo --
+ \subsection{Retain}
+%TODO
+ -- todo --
+ \subsection{Qos}
+%TODO
+ -- todo --
+ \subsection{To Db}
+%TODO
+ -- todo --
+ \subsubsection{Table}
+%TODO
+ -- todo --
+ \subsubsection{Column}
+%TODO
+ -- todo --
+ \subsubsection{Db Id}
+%TODO
+ -- todo --
+ 
+\subsection{Ejemplo}
+Ejemplo que guarda todos los datos en una base de datos y los publica por mqtt
+
+\begin{lstlisting}
+"topc_id":{
+	"function": "Raw",
+	"samples": 1,
+	"topic": "interferometer/raw",
+	"retain":1,
+	"qos":1,
+	"to_db":{
+		"table":"interferometer/raw",
+		"column":"payload",
+		"db_id":"db0"
+	}
+}
+\end{lstlisting}
+
+Ejemplo calcula la media cada 50 datos y solo los publica en mqtt
+\begin{lstlisting}
+"topc_id":{
+	"function": "Mean",
+	"samples": 50,
+	"topic": "interferometer/mean"
+
+}
+\end{lstlisting}
+
+Ejemplo calcula la media cada 200 datos y solo los guarda en la base de datos
+\begin{lstlisting}
+"topc_id":{
+	"function": "Mean",
+	"samples": 200,
+	"to_db":{
+		"table":"interferometer/mean",
+		"column":"payload",
+		"db_id":"db0"
+	}
+}
+\end{lstlisting}
+
+
+
+\section{Joins}
+
+Un joiner es un elemento de unión entre diferentes datos. Sirve para poder procesar datos de diferente fuente, al contrario que los topics que son procesamientos del mismo dato.
+
+La lista de joiner tiene que empezar la key ''joiners'' y ser un diccionario de joiners donde un Joiner se define mediante un ID y un diccionario con los siguientes elementos:
+
+\begin{itemize}
+\item ''synchronous'' - valor 1 si los datos tienen que sincronizarse usando una marca de tiempo 0 si se sincronizan según el orden de llegada [Default: 0]
+\item ''function''  - String donde especificamos la función exacta que queremos ejecutar. El lugar que ocupan los datos se marcan con números encapsulados en corchetes. por ejemplo: '{0}'. El número hace referencia a la posición en la formula. Dicha referencia se usará para indicar a donde tiene que ir cada dato.
+\item ''topics'' - Diccionario con una lista de topics.
+
+\end{itemize}
+
+\subsection{Synchronous}
+%TODO
+ -- todo --
+\subsection{Function}
+%TODO
+ -- todo --
+\subsection{Topics}
+%TODO
+ -- todo --
+
+\subsection{Ejemplo}
+
+\begin{lstlisting}
+	"joiners": {
+		"join_1":{
+			"synchronous": 1,+
+			"function": "({0}+{1})/2", 
+			"topics": { 
+				"topic_1":  {<topic_data>},
+				"topic2": {<topic_data>},
+				"anothertopic":{<topic_data>},
+				"onemore":{<topic_data>}
+			}
+		},
+		"join_2":{...},
+		"another_join":{}
+	},
+\end{lstlisting}
+
+\section{Sockets}
+
+Un socket es la unidad de conexión (o entrada) básica (y única) del sistema. Con ella podemos definir de donde leemos datos y como los leemos.
+
+Al igual que los joiners tiene que ser un diccionario (lista) con los ID's y sus valores. 
+Para definir la lista de sockets tenemos que usar la key: ''sockets'' seguido del diccionario con los sockets individuales.
+
+Vamos a ver los elementos de un Socket:
+
+\begin{itemize}
+\item ''class\_name'' - Nombre del tipo de socket. 
+\item ''control'' - Diccionario para definir cuales son los parámetros de control del socket.
+\item ''publish'' - Lista de topics.
+\item ''delay'' - Establece un retraso entre cada intento de lectura, para mejorar sincronizaciones y no desperdiciar computo si se sabe que el emisor tiene un delay.
+\item parámetros adicionales - Cada tipo de socket tiene unos parámetros adicionales. Ver subsección contigua de cada tipo de socket para mas detalles.
+\end{itemize}
+
+\subsection{Class Name}
+
+
+Las clases actualmente implementadas en el sistema son:
+
+\begin{itemize}
+\item SerialSocket, este socket abre una comunicación serie y trata los datos leídos.
+\item FileSocket, este socket lee lineas de un fichero y las trata como entrada de datos.
+\item MqttSocket -- Underconstruction lee datos de un topic mqtt
+\end{itemize}
+\subsubsection{SerialSocket}
+%TODO
+--todo--
+\subsubsection{FileSocket}
+%TODO
+--todo--
+\subsubsection{MqttSocket}
+%TODO
+--todo--
+\subsection{Control}
+
+ Control es una lista de topics con acciones asociadas. El sistema se subscribe a esos topics y cuando reciben los mensajes establecidos realizan las acciones asociadas. La naturaleza de la acción está determinada por el tipo de socket en el que se encuentre. Por ejemplo en un FileSocket los únicos elementos de control son mandar un 0, que para la lectura del fichero o un 1 que continua la lectura del mismo. Mientras que en un SerialSocket el string que aparezca en action será retransmitido por el puerto serie.
+
+Los elementos de la lista de control son los siguientes:
+
+Una lista [] de diccionarios, donde cada diccionario corresponde a un topic de entrada que contiene las siguientes keys:
+
+\begin{itemize}
+\item ''topic'', topic al que tiene que suscribirse el sistema
+\item ''qos'', qos de la suscripción.
+\item ''actions'', lista de diccionarios con el par de claves ''message'' - ''action'' que determina el comportamiento concreto.
+\end{itemize}
+
+\subsection{Publish}
+%TODO
+
+Aquí es donde se define que hacer con los datos leídos, costa de tres elementos (keys) ''parser'', ''join'' y ''topics''
+ \subsubsection{parser}
+%TODO
+ Es un string donde se establece el formato del payload que vamos a recibir en caso de tener varios valores.
+ Cada valor tiene que estar numerado del 0 al 9 y encerrado en corchetes. Como en el siguiente ejemplo:
+ 
+\begin{lstlisting} 
+"parser": "#{0}:{1};",
+\end{lstlisting}
+				
+ \subsubsection{Join}
+%TODO - completar
+Si queremos mandar los datos a un Join tenemos que usar este clausula donde determinamos que dato va a que join y en que posición. Y en caso de necesario también indicamos cual es el dato de sincronización. La key 'join' contiene una lista de diccionarios donde cada uno tiene las siguientes keys:
+\begin{itemize}
+\item ''from'' - Código numérico del dato que queremos mandar del 0 al 9 (corresponde al mismo número que el parser)
+\item ''to'' - Id del joiner al que queremos mandarlo
+\item ''position'' - La posición dentro de ese joiner
+\item ''sync'' - Posición en el parser que contiene el dato de sincronización.
+\end{itemize}
+ \subsubsection{topics}
+%TODO - completar
+ En topics tenemos una lista estructurada de topics. El elemento principal es un diccionario donde el primer nivel de claves corresponden a las posiciones (números) en el parser, que contienen a su vez otro diccionario que contiene a los topics concretos de ese valor.
+ 
+ Hasta que no tenga definido el formato de declaración formal de la estructura no creo que pueda explicarlo mejor con palabras sin enredar mucho, por lo que paso directamente a unos ejemplos donde se puede entender mejor la estructura completa del socket.
+
+
+\subsection{Ejemplo}
+Ejemplo con dos sockets:
+\begin{lstlisting}
+	"sockets": {
+		"id_filesocket_interferometer_1" : { 
+			"class_name": "FileSocket",
+			"control":[ 
+				{
+					"topic" : "interferometer/control/power",
+					"qos" : 1,
+					"actions":[
+						{
+							"message":"stop", 
+							"action":0 
+						},
+						{
+							"message":"start",
+							"action":1
+						}
+					]
+				}
+			],
+			"publish": {
+				"parser": "#{0}:{1};",
+				"join": [ 
+					{
+						"from": 0, 
+						"to": "join_1", 
+						"position": 0, 
+						"sync": 1
+					}
+				],
+				"topics": {
+					"0": { 
+						"raw":{
+							"function": "Raw",
+							"samples": 1, 
+							"topic": "interferometer/value", 
+							"to_db":{ 
+								"table":"interferometer/raw", 
+								"column":"payload",
+								"db_id":"db0"
+							}
+						}
+                    },
+					"1": {
+						"raw":{
+							"function": "Raw",
+							"samples": 1,
+							"topic": "interferometer/sync"
+						}
+                    }
+			},
+			"file_name": "filename.txt",
+			"delay": 0.001 
+		}, 
+
+		"id_serialsocket_interferometer2": {
+			"class_name": "SerialSocket",
+			"control":[ 
+				{
+					"topic" : "interferometer/control/msg",
+					"qos" : 1,
+					"actions":[
+						{
+							"message":"stop", 
+							"action":"stop"
+						},
+						{
+							"message":"start",
+							"action":"start"
+						}
+					]
+				}
+			],
+			"eol_character":";",
+			"port": "/dev/ttyACM0",
+			"baudrate":9600,
+			"publish": {
+				"parser": "#{0}:{1};",
+				"join": [ 
+					{
+						"from": 0, 
+						"to": "join_1", 
+						"position": 1, 
+						"sync": 1
+					}
+				],
+			"delay": 0.001
+		}
+\end{lstlisting}
+
+\end{document}
+
+
+

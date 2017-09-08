@@ -1,0 +1,3 @@
+
+Para el problema de las clases probar una vez tenemos la instancia creada crear un clon de esta Y luego volver a llamar a una inicializacion con los parametros inciales para forzar que sean clases distntas.
+

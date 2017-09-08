@@ -1,0 +1,87 @@
+{
+	"control": {
+		"address": "localhost",
+		"port": 1883,
+		"topic": "master/control",
+		"qos": 0,
+		"control_messages": {
+			"reload": "reload",
+			"shutdown": "shutdown",
+			"status": "status"
+		}
+	},
+	"dbs": {
+		"db0": {
+			"id_deprecated": "db0",
+			"class_name": "Influx",
+			"addres": "localhost",
+			"port": "default",
+			"db_name": "payload_logger",
+			"user": "admin",
+			"password": "admin"
+		}
+	},
+	"joiners": {
+		"join_1": {
+            "class_name" : "FasometroJoiner",
+			"function": "{0}-{1}",
+			"topics": {
+			}
+		}
+	},
+	"sockets": {
+		"id_fasometro_serial": {
+			"class_name": "FasometroSerialSocket",
+            "control":[
+                {
+                    "topic" : "fasometro/control/skip",
+                    "qos" : 1
+                }
+            ],
+			"baudrate": 500000,
+			"eol_count": 30,
+            "eol_character":"_",
+            "iol_character":"#",
+			"port": "/dev/ttyAMA0",
+			"delay": 0,
+			"unpack": "<l",
+			"publish": {
+				"parser": "_{4}::{3}||{2}**{1}??{0}#",
+				"join": [{
+					"from": "0",
+					"to": "join_1",
+					"position": 0,
+                    "sync":"4"
+				},{
+					"from": "1",
+					"to": "join_1",
+					"position": 1,
+                    "sync":"4"
+				}],
+				"topics": {
+					"1": {
+						"raw": {
+							"function": "Raw",
+							"samples": 1,
+							"to_file": {
+								"file_name": "output/out_angle1.csv",
+								"file_flags": "a"
+							}
+						}
+                    			},
+					"0": {
+						"raw": {
+							"function": "Raw",
+							"samples": 1,
+							"to_file": {
+								"file_name": "output/out_angle2.csv",
+								"file_flags": "a"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+

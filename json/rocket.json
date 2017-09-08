@@ -1,0 +1,245 @@
+{
+"control": {
+		"address": "localhost",
+		"port": 1883,
+		"topic": "master/control",
+		"qos": 0,
+		"control_messages": {
+			"reload": "reload",
+			"shutdown": "shutdown",
+			"status": "status"
+		}
+	},
+"dbs": {
+	"db0":{
+		"id_deprecated": "db0",
+		"class_name": "Influx",
+		"addres": "localhost",
+		"port": "default",
+		"db_name": "payload_logger",
+		"user": "admin",
+		"password": "admin"
+	}
+},
+"joiners": {
+	"join_1":{
+		"function": "(abs{0}+abs{1}+abs{2})",
+		"class_name":"Joiner",
+		"topics": {
+			"raw_all":  {
+				"function": "Raw",
+				"samples": 1,
+				"topic": "rocket/acelerometer/all",
+				"to_db":{
+					"table":"rocket/acelerometer/all",
+					"column":"payload",
+					"db_id":"db0"
+				}
+			}
+		}
+	}
+},
+"sockets": {
+	"id_serialsocket_rocket": {
+		"class_name": "ByteSerialSocket",
+		"eol_character":";",
+        "iol_character":"#",
+		"baudrate": 9600,
+		"port": "/dev/ttyACM0",
+		"delay": 0,
+		"publish": {
+			"parser": "#{0},{1},{2}:{3},{4},{5}:{6},{7},{8}:{9},{10},{11},{12},{13}:{14};",
+			"join": [
+				{
+					"from": "0",
+					"to": "join_1",
+					"position": 0
+				},{
+					"from": "1",
+					"to": "join_1",
+					"position": 1
+				},{
+					"from": "2",
+					"to": "join_1",
+					"position": 2
+				}
+			],
+			"topics": {
+				"0": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/acelerometer/x"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/acelerometer/x/mean"
+					}
+				},
+				"1": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/acelerometer/y"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/acelerometer/y/mean"
+					}
+				},
+				"2": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/acelerometer/z"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/acelerometer/z/mean"
+					}
+				},
+				"3": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/magnetometer/x"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/magnetometer/x/mean"
+					}
+				},
+				"4": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/magnetometer/y"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/magnetometer/y/mean"
+					}
+				},
+				"5": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/magnetometer/z"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/magnetometer/z/mean"
+					}
+				},
+
+				"6": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/varometer/temperature"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/varometer/temperature/mean"
+					}
+				},
+				"7": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/varometer/presion"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/varometer/presion/mean"
+					}
+				},
+				"8": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/varometer/altitude"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/varometer/altitude/mean"
+					}
+				},
+				"9": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/gps/latitude"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/gps/latitude/mean"
+					}
+				},
+				"10": {
+					"raw":{
+						"function": "Raw",
+						"samples": 10,
+						"retain":1,
+						"topic": "rocket/gps/latitude/direction"
+					}
+				},
+				"11": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/gps/longitude"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/gps/longitude/mean"
+						}
+				},
+				"12": {
+					"raw":{
+						"function": "Raw",
+						"samples": 10,
+						"retain":1,
+						"topic": "rocket/gps/longitude/direction"
+					}
+				},
+				"13": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/gps/altitude"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/gps/altitude/mean"
+						}
+				},
+				"14": {
+					"raw":{
+						"function": "Raw",
+						"samples": 1,
+						"topic": "rocket/airquality/value"
+					},
+					"mean":{
+						"function": "Mean",
+						"samples": 10,
+						"topic": "rocket/airquality/value/mean"
+					}
+				}
+			}
+		}
+	}
+}
+}

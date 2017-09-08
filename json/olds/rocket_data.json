@@ -1,0 +1,267 @@
+{
+"control": {
+		"address": "localhost",
+		"port": 1883,
+		"topic": "master/control",
+		"qos": 0,
+		"control_messages": {
+			"reload": "reload",
+			"shutdown": "shutdown",
+			"status": "status"
+		}
+	},
+"dbs": {
+	"db0":{
+		"id_deprecated": "db0",
+		"class_name": "Influx",
+		"addres": "localhost",
+		"port": "default",
+		"db_name": "payload_logger",
+		"user": "admin",
+		"password": "admin"
+	}
+},
+"joiners": {
+	"join_1":{
+		"function": "(abs{0}+abs{1}+abs{2})",
+		"class_name":"Joiner",
+		"topics": {
+			"raw_all":  {
+				"function": "Raw",
+				"samples": 1,
+				"topic": "rocket/acelerometer/all",
+				"to_db":{
+					"table":"rocket/acelerometer/all",
+					"column":"payload",
+					"db_id":"db0"
+				}
+			}
+		}
+	}
+},
+"sockets": {
+	"id_serialsocket_rocket": {
+		"class_name": "SerialSocket",
+		"eol_character":";",
+		"publish": {
+			"parser": "#{0},{1},{2}:{14},{15},{16}:{3},{4},{5}:{6},{11},{7},{12},{8},{13}:{9};",
+			"join": [
+				{
+					"from": "0",
+					"to": "join_1",
+					"position": 0
+				},{
+					"from": "1",
+					"to": "join_1",
+					"position": 1
+				},{
+					"from": "2",
+					"to": "join_1",
+					"position": 2
+				}
+			],
+
+		        "topics": {
+                    "0": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 1,
+		                    "topic": "rocket/acelerometer/x",
+				            "__to_db":{
+					            "table":"rocket/acelerometer/x",
+					            "column":"payload",
+					            "db_id":"db0"
+				            }
+                        },
+                        "mean":{
+		                    "function": "Mean",
+		                    "samples": 10,
+		                    "topic": "rocket/acelerometer/x/mean"
+                        }
+                    },
+                    "1": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 1,
+		                    "topic": "rocket/acelerometer/y",
+				            "__to_db":{
+					            "table":"rocket/acelerometer/y",
+					            "column":"payload",
+					            "db_id":"db0"
+				            }
+                        },
+                        "mean":{
+		                    "function": "Mean",
+		                    "samples": 10,
+		                    "topic": "rocket/acelerometer/y/mean"
+                        }
+                    },
+                    "2": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 1,
+		                    "topic": "rocket/acelerometer/z",
+				            "__to_db":{
+					            "table":"rocket/acelerometer/z",
+					            "column":"payload",
+					            "db_id":"db0"
+				            }
+                        },
+                        "mean":{
+		                    "function": "Mean",
+		                    "samples": 10,
+		                    "topic": "rocket/acelerometer/z/mean"
+                        }
+                    },
+                    "3": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 1,
+		                    "topic": "rocket/varometer/temperature",
+				            "__to_db":{
+					            "table":"rocket/varometer/temperature",
+					            "column":"payload",
+					            "db_id":"db0"
+				            }
+                        },
+                        "mean":{
+		                    "function": "Mean",
+		                    "samples": 10,
+		                    "topic": "rocket/varometer/temperature/mean"
+                        }
+                    },
+                    "4": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 1,
+		                    "topic": "rocket/varometer/presion",
+				            "__to_db":{
+					            "table":"rocket/varometer/presion",
+					            "column":"payload",
+					            "db_id":"db0"
+				            }
+                        },
+                        "mean":{
+		                    "function": "Mean",
+		                    "samples": 10,
+		                    "topic": "rocket/varometer/presion/mean"
+                        }
+                    },
+                    "5": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 1,
+		                    "topic": "rocket/varometer/altitude",
+				            "__to_db":{
+					            "table":"rocket/varometer/altitude",
+					            "column":"payload",
+					            "db_id":"db0"
+				            }
+                        },
+                        "mean":{
+		                    "function": "Mean",
+		                    "samples": 10,
+		                    "topic": "rocket/varometer/altitude/mean"
+                        }
+                    },
+                    "6": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 1,
+		                    "topic": "rocket/gps/latitude",
+				            "__to_db":{
+					            "table":"rocket/gps/latitude",
+					            "column":"payload",
+					            "db_id":"db0"
+				            }
+                        },
+                        "mean":{
+		                    "function": "Mean",
+		                    "samples": 10,
+		                    "topic": "rocket/gps/latitude/mean"
+                        }
+                    },
+                    "7": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 1,
+		                    "topic": "rocket/gps/longitude",
+				            "__to_db":{
+					            "table":"rocket/gps/longitude",
+					            "column":"payload",
+					            "db_id":"db0"
+				            }
+                        },
+                        "mean":{
+		                    "function": "Mean",
+		                    "samples": 10,
+		                    "topic": "rocket/gps/longitude/mean"
+                        }
+                    },
+                    "8": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 1,
+		                    "topic": "rocket/gps/altitude",
+				            "__to_db":{
+					            "table":"rocket/gps/altitude",
+					            "column":"payload",
+					            "db_id":"db0"
+				            }
+                        },
+                        "mean":{
+		                    "function": "Mean",
+		                    "samples": 10,
+		                    "topic": "rocket/gps/altitude/mean"
+                        }
+                    },
+                    "9": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 1,
+		                    "topic": "rocket/airquality/value",
+				            "__to_db":{
+					            "table":"rocket/airquality/value",
+					            "column":"payload",
+					            "db_id":"db0"
+				            }
+                        },
+                        "mean":{
+		                    "function": "Mean",
+		                    "samples": 10,
+		                    "topic": "rocket/airquality/value/mean"
+                        }
+                    },
+                    "10": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 100,
+                            "retain":1,
+		                    "topic": "rocket/gps/latitude_m"
+                        }
+                    },
+                    "11": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 100,
+                            "retain":1,
+		                    "topic": "rocket/gps/longitude_m"
+                        }
+                    },
+                    "12": {
+                        "raw":{
+		                    "function": "Raw",
+		                    "samples": 100,
+                            "retain":1,
+		                    "topic": "rocket/gps/altitude_m"
+                        }
+                    }
+                }
+			},
+			"port": "/dev/ttyACM0",
+            "baudrate":9600,
+			"delay": 0
+		}
+	}
+
+}

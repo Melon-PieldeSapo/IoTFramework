@@ -1,0 +1,92 @@
+{
+	"control": {
+		"address": "localhost",
+		"port": 1883,
+		"topic": "master/control",
+		"qos": 0,
+		"control_messages": {
+			"reload": "reload",
+			"shutdown": "shutdown",
+			"status": "status"
+		}
+	},
+	"dbs": {
+		"db0": {
+			"id_deprecated": "db0",
+			"class_name": "Influx",
+			"addres": "localhost",
+			"port": "default",
+			"db_name": "payload_logger",
+			"user": "admin",
+			"password": "admin"
+		}
+	},
+	"joiners": {
+		"join_1": {
+            "class_name" : "FasometroJoiner",
+			"function": "(math.atan2({1},{0}))*(180/(math.pi))",
+			"topics": {
+				"raw": {
+					"function": "Raw",
+					"samples":1,
+			        "to_db":{
+				        "table":"fasometro",
+				        "column":"angle",
+				        "db_id":"db0"
+			        }
+				}
+			}
+		}
+	},
+	"sockets": {
+		"id_fasometro_serial": {
+			"class_name": "FasometroSerialSocket",
+			"baudrate": 500000,
+			"eol_count": 12,
+            "eol_character":"_",
+            "iol_character":"#",
+			"port": "/dev/ttyAMA0",
+			"delay": 0,
+			"unpack": "<l",
+			"publish": {
+				"parser": "_{1}??{0}#",
+				"join": [{
+					"from": "0",
+					"to": "join_1",
+					"position": 0
+				},{
+					"from": "1",
+					"to": "join_1",
+					"position": 1
+				}],
+				"__topics": {
+					"1": {
+						"raw": {
+							"function": "Raw",
+							"samples": 200,
+							"topic": "fasometro/imaginaria"
+						},
+						"mean": {
+							"function": "Mean",
+							"samples": 200,
+							"topic": "fasometro/imaginaria/mean"
+						}
+                    },
+					"0": {
+						"raw": {
+							"function": "Raw",
+							"samples": 200,
+							"topic": "fasometro/real"
+						},
+						"mean": {
+							"function": "Mean",
+							"samples": 200,
+							"topic": "fasometro/real/mean"
+                        }
+					}
+				}
+			}
+		}
+	}
+}
+

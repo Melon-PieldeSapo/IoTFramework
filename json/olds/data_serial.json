@@ -1,0 +1,55 @@
+{
+    "control":{
+        "address" : "localhost",
+        "port": 1883,
+        "topic":"master/control",
+        "qos":0,
+        "control_messages":{
+            "reload":"reload",
+            "shutdown":"shutdown",
+            "status":"status"
+        }
+    },
+    
+    "sockets": [
+        {
+            "class_name" : "SerialSocket",
+            "baudrate":500000,
+            "control":[
+                {
+                    "topic" : "arduino/control/power",
+                    "qos" : 1,
+                    "actions":[
+                        {
+                            "message":"stop",
+                            "action":0
+                        },
+                        {
+                            "message":"start",
+                            "action":1
+                        }
+                    ]
+                }
+            ],
+            "publish" : {
+                "parser":"{0}:{1}",
+                "topics":[[
+                    {
+                        "function":"Raw",
+                        "samples":1,
+                        "topic":"arduino/test/hl"
+                    }],[
+                    {
+                        "function":"Raw",
+                        "samples":1,
+                        "topic":"arduino/test/rand"
+                    }]
+                ]
+            }, 
+            "port" : "/dev/ttyACM0",
+            "delay" : 0.01,
+            "encode" : "utf-8"
+        }
+    ]
+
+}

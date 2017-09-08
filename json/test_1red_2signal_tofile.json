@@ -1,0 +1,68 @@
+{
+	"control": {
+		"address": "localhost",
+		"port": 1883,
+		"topic": "master/control",
+		"qos": 0,
+		"control_messages": {
+			"reload": "reload",
+			"shutdown": "shutdown",
+			"status": "status"
+		}
+	},
+	"sockets": {
+		"id_fasometro_serial": {
+			"class_name": "FasometroSerialSocket",
+            "control":[
+                {
+                    "topic" : "fasometro/control/skip",
+                    "qos" : 1
+                }
+            ],
+			"baudrate": 500000,
+			"eol_count": 30,
+            "eol_character":"_",
+            "iol_character":"#",
+			"port": "/dev/ttyAMA0",
+			"delay": 0,
+			"unpack": "<l",
+			"publish": {
+				"parser": "_{4}::{3}||{2}**{1}??{0}#",
+
+				"topics": {
+					"1": {
+						"raw": {
+							"function": "Raw",
+							"samples": 3,
+							"to_file": {
+								"file_name": "output/out_angle3.csv",
+								"file_flags": "a"
+							}
+						}
+                    			},
+					"0": {
+						"raw": {
+							"function": "Raw",
+							"samples": 3,
+							"to_file": {
+								"file_name": "output/out_angle4.csv",
+								"file_flags": "a"
+							}
+						}
+					},
+					"2": {
+						"raw": {
+							"function": "Raw",
+							"samples": 3,
+							"to_file": {
+								"file_name": "output/out_timemark2.csv",
+								"file_flags": "a"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
