@@ -271,6 +271,7 @@ class Socket(masterObject):
         Split the payload acording to parser order
         to each corresponding stat group
         '''
+        #print(self.stats)
         for stat_group in self.stats:# A cada grupo mandar solo el dato correspondiente.
             #print("Sending payload To {} ".format(stat_group))
             if( stat_group in payload): #Tenemos payload para el grupo
@@ -675,19 +676,20 @@ class ByteSerialSocket(SerialSocket):
         '''
         #self.mqttPublishPayload(payload,mqtt_client)
         payload_group = []
-        start_time = time.time()
+        #start_time = time.time()
         if(self.parser != False):   # tenemos parser "#{0}:{1};"
             payload_group  = self.ParsePayload(payload)
         else:#No hay parser, se asigna el payload como un solo valor al grupo 0
             payload_group = {"0":payload}
+        self.processStats(payload_group)
         #print(json.dumps(payload_group, indent=4, sort_keys=True))
-        print("Socket : ParsePayload--- %s seconds ---" % (time.time() - start_time))
-        start_time = time.time()
-        print("Socket : processStats--- %s seconds ---" % (time.time() - start_time))
+        #print("Socket : ParsePayload--- %s seconds ---" % (time.time() - start_time))
+        #start_time = time.time()
+        #print("Socket : processStats--- %s seconds ---" % (time.time() - start_time))
         #TODO: add to payload_group the join information ¿? 
-        start_time = time.time()
+        #start_time = time.time()
         joindata = self.getJoinPayload(payload_group)
-        print("Socket : getJoinPayload--- %s seconds ---" % (time.time() - start_time))
+        #print("Socket : getJoinPayload--- %s seconds ---" % (time.time() - start_time))
         return joindata 
 
     def doUnpack(self,payload):
@@ -695,9 +697,15 @@ class ByteSerialSocket(SerialSocket):
             try:
                 payload = struct.unpack(self.unpack,payload)[0]  
             except:
-                payload=''
+                payload=False
                 print("Error: ByteSerialSocket.unpack()")
                 self.serial.flushInput()
+                pass
+        if(payload == False):
+            try:
+                payload= payload.decode('utf-8')
+            except:
+                payload=''
                 pass
         return payload     
 
@@ -729,7 +737,7 @@ class ByteSerialSocket(SerialSocket):
                 if c[0] == self.eol_character_ord:
                     #We found the end:
                     break
-        else if(self.eol_count):
+        elif(self.eol_count):
             line = self.serial.read(self.eol_count-1)
             line +=c
             #print(line)
@@ -738,7 +746,7 @@ class ByteSerialSocket(SerialSocket):
                 return False
             
         #self.serial.flushInput()
-        print(line)
+        #print(line)
         #print (''.join(format(x, '02x')+'.' for x in payload))
         inWaiting = self.serial.inWaiting()
         if(inWaiting >= 4090):
@@ -758,10 +766,11 @@ class ByteSerialSocket(SerialSocket):
         Parse the payload using the parser config string
         and split it in groups.
         '''
+        #print(payload)
         #payload = "#22134:643.0605-56234;"
         #print("In Parse")
         payload_group = {}
-        #print self.parser_array
+        #print(self.parser_array)
         for group in self.parser_array:
             start = -1
             end = -1
