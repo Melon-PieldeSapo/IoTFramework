@@ -696,7 +696,7 @@ class ByteSerialSocket(SerialSocket):
         if(self.unpack!=False):
             try:
                 payload = struct.unpack(self.unpack,payload)[0]  
-            except:
+            except Exception as e:
                 payload=False
                 print("Error: ByteSerialSocket.unpack()")
                 self.serial.flushInput()
@@ -704,9 +704,14 @@ class ByteSerialSocket(SerialSocket):
         if(payload == False):
             try:
                 payload= payload.decode('utf-8')
-            except:
+            except Exception as e:
                 payload=''
                 pass
+        try:
+            payload = float(payload)#TODO Quitar este float y hacer que el tipo de dato sea configurable
+        except Exception as e:
+            payload = False
+            pass
         return payload     
 
     def receivePayload(self):
@@ -746,7 +751,7 @@ class ByteSerialSocket(SerialSocket):
                 return False
             
         #self.serial.flushInput()
-        #print(line)
+        print(line)
         #print (''.join(format(x, '02x')+'.' for x in payload))
         inWaiting = self.serial.inWaiting()
         if(inWaiting >= 4090):
@@ -800,7 +805,7 @@ class ByteSerialSocket(SerialSocket):
                 start = 0
             if(group_post != ''):
                 group_post_ord = ord(group_post[0])
-                for i in range(start+4,len_payload):# TODO: hacer ese 4 un parametro de configuracion
+                for i in range(start,len_payload):
                     if(end == -1 and payload[i] == group_post_ord):
                         #Hemos encontrado el primer caracter del final
                         end = i
@@ -817,7 +822,8 @@ class ByteSerialSocket(SerialSocket):
 
             #print("positions prec-{}:{} -- post{}:{}".format(group['prec'],start,group['post'],end))    
             data = self.doUnpack(payload[start:end])
-            if(data== ''): #Hemos tenido un error en unpack
+            if(data is None): #Hemos tenido un error en unpack
+                data = False
                 print("Payload: {} - Dato: {}".format(payload,payload[start:end]))
             payload_group[group['position']] = data
             payload = payload[end:]

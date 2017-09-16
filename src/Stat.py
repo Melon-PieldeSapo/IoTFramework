@@ -59,6 +59,8 @@ class Stat(masterObject):
 
     def addValue(self,value):
         #print "adding {}".format(value)
+        if(value is None):
+            return False
         self.values.append(value)
 
     def clearValues(self):
@@ -107,6 +109,9 @@ class Stat(masterObject):
         #print("Stat {} : len {} with total {}.".format(self.__class__.__name__,len(self.values),self.total_values))
         if(len(self.values) == self.total_values):
             stat = self.getStat()
+            if(stat is None or stat == 0):
+                #print("Cant publis stat {} because none".format(stat))
+                return False
             self.publishStat(stat)
             self.saveToDb(stat)
             self.saveToFile(stat)
@@ -115,6 +120,13 @@ class Stat(masterObject):
 class RawStat(Stat):
     def getStat(self):
         return self.values[self.total_values-1]
+    def addValue(self,value):        
+        #print("Adding value {} to raw stat".format(value))
+        try:
+            self.values.append(float(value))        
+        except Exception as e:
+            print("Error adding value -{}- to Raw".format(value))
+            #print(e.message)
 
 class MeanStat(Stat):
     def getStat(self):
