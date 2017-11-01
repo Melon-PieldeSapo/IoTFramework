@@ -23,14 +23,14 @@
 },
 "joiners": {
 	"join_1":{
-		"function": "(abs{0}+abs{1}+abs{2})",
+		"function": "round(math.sqrt(math.pow({0},2)+math.pow({1},2)+math.pow({2},2)),2)",
 		"class_name":"Joiner",
 		"topics": {
 			"raw_all":  {
 				"function": "Raw",
 				"samples": 1,
 				"topic": "rocket/acelerometer/all",
-				"to_db":{
+				"__to_db":{
 					"table":"rocket/acelerometer/all",
 					"column":"payload",
 					"db_id":"db0"
